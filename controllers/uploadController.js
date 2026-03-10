@@ -19,7 +19,6 @@ exports.uploadCarImage = async (req, res) => {
       message: "Foto u ngarkua me sukses",
       file: imagePath,
     });
-
   } catch (error) {
     console.error("Upload main image error:", error);
     res.status(500).json({ error: error.message });
@@ -37,16 +36,21 @@ exports.uploadCarGallery = async (req, res) => {
     const carId = Number(id);
 
     for (const file of req.files) {
+      const [rows] = await db.query(
+        "SELECT COALESCE(MAX(id), 0) + 1 AS nextId FROM car_images"
+      );
+
+      const nextId = rows[0].nextId;
+
       await db.query(
-        "INSERT INTO car_images (id, car_id, image) VALUES (NULL, ?, ?)",
-        [carId, file.filename]
+        "INSERT INTO car_images (id, car_id, image) VALUES (?, ?, ?)",
+        [nextId, carId, file.filename]
       );
     }
 
     res.json({
       message: "Fotot e galerise u ngarkuan me sukses"
     });
-
   } catch (error) {
     console.error("Upload gallery error:", error);
     res.status(500).json({ error: error.message });
