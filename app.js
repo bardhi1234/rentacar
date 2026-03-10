@@ -5,12 +5,18 @@ const path = require("path");
 
 dotenv.config();
 
+const db = require("./config/db");
+
 const app = express();
 
 // middleware
 app.use(cors({
-  origin: "*",
-  methods: ["GET","POST","PUT","DELETE"],
+  origin: [
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://rentacar-premium.netlify.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
 
@@ -34,9 +40,34 @@ app.get("/", (req, res) => {
   res.send("Rent A Car backend po funksionon 🚗");
 });
 
-// port
+async function createCarsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS cars (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        brand VARCHAR(100),
+        model VARCHAR(100),
+        full_name VARCHAR(255),
+        year INT,
+        transmission VARCHAR(50),
+        fuel VARCHAR(50),
+        seats INT,
+        price_per_day DECIMAL(10,2),
+        description TEXT,
+        status VARCHAR(50),
+        main_image VARCHAR(255)
+      )
+    `);
+
+    console.log("Tabela cars u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës:", error);
+  }
+}
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
+  await createCarsTable();
 });
