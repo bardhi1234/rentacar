@@ -22,21 +22,35 @@ exports.addCar = async (req, res) => {
       fuel,
       seats,
       price_per_day,
-      description
+      description,
+      status
     } = req.body;
 
+    const main_image = req.file ? req.file.filename : null;
+
     const [result] = await db.query(
-      `INSERT INTO cars 
-      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [brand, model, full_name, year, transmission, fuel, seats, price_per_day, description]
+      `INSERT INTO cars
+      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description, status, main_image)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        brand,
+        model,
+        full_name,
+        year,
+        transmission,
+        fuel,
+        seats,
+        price_per_day,
+        description || "",
+        status || "available",
+        main_image
+      ]
     );
 
     res.json({
       message: "Car added successfully",
       id: result.insertId
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -53,7 +67,6 @@ exports.getCarGallery = async (req, res) => {
     );
 
     res.json(images);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -79,7 +92,6 @@ exports.uploadGallery = async (req, res) => {
     res.json({
       message: "Fotot e galerise u ngarkuan me sukses"
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -95,7 +107,6 @@ exports.deleteCar = async (req, res) => {
     res.json({
       message: "Car deleted"
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -115,39 +126,75 @@ exports.updateCar = async (req, res) => {
       fuel,
       seats,
       price_per_day,
-      description
+      description,
+      status
     } = req.body;
 
-    await db.query(
-      `UPDATE cars SET
-        brand = ?,
-        model = ?,
-        full_name = ?,
-        year = ?,
-        transmission = ?,
-        fuel = ?,
-        seats = ?,
-        price_per_day = ?,
-        description = ?
-      WHERE id = ?`,
-      [
-        brand,
-        model,
-        full_name,
-        year,
-        transmission,
-        fuel,
-        seats,
-        price_per_day,
-        description,
-        id
-      ]
-    );
+    const main_image = req.file ? req.file.filename : null;
+
+    if (main_image) {
+      await db.query(
+        `UPDATE cars SET
+          brand = ?,
+          model = ?,
+          full_name = ?,
+          year = ?,
+          transmission = ?,
+          fuel = ?,
+          seats = ?,
+          price_per_day = ?,
+          description = ?,
+          status = ?,
+          main_image = ?
+        WHERE id = ?`,
+        [
+          brand,
+          model,
+          full_name,
+          year,
+          transmission,
+          fuel,
+          seats,
+          price_per_day,
+          description || "",
+          status || "available",
+          main_image,
+          id
+        ]
+      );
+    } else {
+      await db.query(
+        `UPDATE cars SET
+          brand = ?,
+          model = ?,
+          full_name = ?,
+          year = ?,
+          transmission = ?,
+          fuel = ?,
+          seats = ?,
+          price_per_day = ?,
+          description = ?,
+          status = ?
+        WHERE id = ?`,
+        [
+          brand,
+          model,
+          full_name,
+          year,
+          transmission,
+          fuel,
+          seats,
+          price_per_day,
+          description || "",
+          status || "available",
+          id
+        ]
+      );
+    }
 
     res.json({
       message: "Car updated"
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
