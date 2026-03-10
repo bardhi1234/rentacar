@@ -38,7 +38,7 @@ exports.uploadCarGallery = async (req, res) => {
 
     for (const file of req.files) {
       await db.query(
-        "INSERT INTO car_images (car_id, image) VALUES (?, ?)",
+        "INSERT INTO car_images (id, car_id, image) VALUES (NULL, ?, ?)",
         [carId, file.filename]
       );
     }
