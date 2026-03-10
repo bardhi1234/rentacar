@@ -10,10 +10,7 @@ exports.uploadCarImage = async (req, res) => {
 
     const imagePath = req.file.filename;
 
-    await db.query(
-      "UPDATE cars SET main_image = ? WHERE id = ?",
-      [imagePath, id]
-    );
+    await db.query("UPDATE cars SET main_image = ? WHERE id = ?", [imagePath, id]);
 
     res.json({
       message: "Foto u ngarkua me sukses",
