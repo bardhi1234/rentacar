@@ -61,7 +61,30 @@ async function createCarsTable() {
 
     console.log("Tabela cars u krijua ose ekziston.");
   } catch (error) {
-    console.error("Gabim gjatë krijimit të tabelës:", error);
+    console.error("Gabim gjatë krijimit të tabelës cars:", error);
+  }
+}
+
+async function createAdminsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+      )
+    `);
+
+    console.log("Tabela admins u krijua ose ekziston.");
+
+    await db.query(`
+      INSERT IGNORE INTO admins (email, password)
+      VALUES ('admin@rentacar.com', '123456')
+    `);
+
+    console.log("Admin default u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës admins:", error);
   }
 }
 
@@ -70,4 +93,5 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
   await createCarsTable();
+  await createAdminsTable();
 });

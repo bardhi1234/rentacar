@@ -2,29 +2,43 @@ const db = require("../config/db");
 
 exports.loginAdmin = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
-    const [admins] = await db.query(
-      "SELECT * FROM admins WHERE email = ? AND password = ?",
-      [email, password]
-    );
+    // pastrim input
+    email = email ? email.trim() : "";
+    password = password ? password.trim() : "";
 
-    if (admins.length > 0) {
-      return res.json({
-        success: true,
-        message: "Login successful",
-        admin: {
-          id: admins[0].id,
-          email: admins[0].email
-        }
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email dhe password janë të detyrueshme"
       });
     }
 
-    res.status(401).json({
-      success: false,
-      message: "Email ose password gabim"
+    const [admins] = await db.query(
+      "SELECT id, email FROM admins WHERE email = ? AND password = ?",
+      [email, password]
+    );
+
+    if (admins.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "Email ose password gabim"
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Login successful",
+      admin: admins[0]
     });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Login error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Gabim në server"
+    });
   }
 };
