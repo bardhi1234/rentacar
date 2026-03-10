@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Test</title>
+</head>
+<body>
+  <h2>Upload foto per veturen</h2>
+
+  <form id="uploadForm">
+    <input type="file" id="image" name="image" accept="image/*" />
+    <button type="submit">Upload</button>
+  </form>
+
+  <p id="result"></p>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const result = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const fileInput = document.getElementById("image");
+      if (!fileInput.files.length) {
+        result.textContent = "Zgjedh nje foto fillimisht";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("image", fileInput.files[0]);
+
+      try {
+        const response = await fetch("http://localhost:5000/api/cars/1/upload", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+        result.textContent = JSON.stringify(data);
+      } catch (error) {
+        result.textContent = "Gabim: " + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
