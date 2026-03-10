@@ -43,9 +43,9 @@ exports.uploadCarGallery = async (req, res) => {
       const nextId = rows[0].nextId;
 
       await db.query(
-        "INSERT INTO car_images (id, car_id, image) VALUES (?, ?, ?)",
-        [nextId, carId, file.filename]
-      );
+  "INSERT INTO car_gallery (car_id, image) VALUES (?, ?)",
+  [carId, file.filename]
+);
     }
 
     res.json({
