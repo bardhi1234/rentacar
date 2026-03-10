@@ -1,5 +1,6 @@
 const db = require("../config/db");
 
+// GET ALL CARS
 exports.getCars = async (req, res) => {
   try {
     const [cars] = await db.query("SELECT * FROM cars ORDER BY id DESC");
@@ -9,9 +10,10 @@ exports.getCars = async (req, res) => {
   }
 };
 
+// ADD NEW CAR
 exports.addCar = async (req, res) => {
   try {
-    let {
+    const {
       brand,
       model,
       full_name,
@@ -20,60 +22,27 @@ exports.addCar = async (req, res) => {
       fuel,
       seats,
       price_per_day,
-      description,
-      status,
-      main_image
+      description
     } = req.body;
-
-    brand = brand ? brand.trim() : "";
-    model = model ? model.trim() : "";
-    full_name = full_name ? full_name.trim() : "";
-    transmission = transmission ? transmission.trim() : "";
-    fuel = fuel ? fuel.trim() : "";
-    description = description ? description.trim() : "";
-    status = status ? status.trim() : "available";
-    main_image = main_image ? main_image.trim() : null;
-
-    if (
-      !brand ||
-      !model ||
-      !full_name ||
-      !year ||
-      !transmission ||
-      !fuel ||
-      !seats ||
-      !price_per_day
-    ) {
-      return res.status(400).json({
-        message: "Të gjitha fushat kryesore janë të detyrueshme"
-      });
-    }
 
     const [result] = await db.query(
       `INSERT INTO cars 
-      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description, status, main_image)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        brand,
-        model,
-        full_name,
-        year,
-        transmission,
-        fuel,
-        seats,
-        price_per_day,
-        description,
-        status,
-        main_image
-      ]
+      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [brand, model, full_name, year, transmission, fuel, seats, price_per_day, description]
     );
 
-    res.json({ message: "Car added successfully", id: result.insertId });
+    res.json({
+      message: "Car added successfully",
+      id: result.insertId
+    });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// GET CAR GALLERY
 exports.getCarGallery = async (req, res) => {
   try {
     const { id } = req.params;
@@ -84,28 +53,60 @@ exports.getCarGallery = async (req, res) => {
     );
 
     res.json(images);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// UPLOAD GALLERY IMAGES
+exports.uploadGallery = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const files = req.files;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "Nuk u dergua asnje foto" });
+    }
+
+    for (const file of files) {
+      await db.query(
+        "INSERT INTO car_images (car_id, image) VALUES (?, ?)",
+        [id, file.filename]
+      );
+    }
+
+    res.json({
+      message: "Fotot e galerise u ngarkuan me sukses"
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// DELETE CAR
 exports.deleteCar = async (req, res) => {
   try {
     const { id } = req.params;
 
     await db.query("DELETE FROM cars WHERE id = ?", [id]);
 
-    res.json({ message: "Car deleted" });
+    res.json({
+      message: "Car deleted"
+    });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+// UPDATE CAR
 exports.updateCar = async (req, res) => {
   try {
     const { id } = req.params;
 
-    let {
+    const {
       brand,
       model,
       full_name,
@@ -114,45 +115,20 @@ exports.updateCar = async (req, res) => {
       fuel,
       seats,
       price_per_day,
-      description,
-      status
+      description
     } = req.body;
 
-    brand = brand ? brand.trim() : "";
-    model = model ? model.trim() : "";
-    full_name = full_name ? full_name.trim() : "";
-    transmission = transmission ? transmission.trim() : "";
-    fuel = fuel ? fuel.trim() : "";
-    description = description ? description.trim() : "";
-    status = status ? status.trim() : "available";
-
-    if (
-      !brand ||
-      !model ||
-      !full_name ||
-      !year ||
-      !transmission ||
-      !fuel ||
-      !seats ||
-      !price_per_day
-    ) {
-      return res.status(400).json({
-        message: "Të gjitha fushat kryesore janë të detyrueshme"
-      });
-    }
-
     await db.query(
-      `UPDATE cars SET 
-      brand = ?,
-      model = ?,
-      full_name = ?,
-      year = ?,
-      transmission = ?,
-      fuel = ?,
-      seats = ?,
-      price_per_day = ?,
-      description = ?,
-      status = ?
+      `UPDATE cars SET
+        brand = ?,
+        model = ?,
+        full_name = ?,
+        year = ?,
+        transmission = ?,
+        fuel = ?,
+        seats = ?,
+        price_per_day = ?,
+        description = ?
       WHERE id = ?`,
       [
         brand,
@@ -164,12 +140,14 @@ exports.updateCar = async (req, res) => {
         seats,
         price_per_day,
         description,
-        status,
         id
       ]
     );
 
-    res.json({ message: "Car updated" });
+    res.json({
+      message: "Car updated"
+    });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
