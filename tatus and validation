@@ -1,0 +1,187 @@
+[1mdiff --git a/controllers/carController.js b/controllers/carController.js[m
+[1mindex fae6935..fa7f4ef 100644[m
+[1m--- a/controllers/carController.js[m
+[1m+++ b/controllers/carController.js[m
+[36m@@ -2,7 +2,7 @@[m [mconst db = require("../config/db");[m
+ [m
+ exports.getCars = async (req, res) => {[m
+   try {[m
+[31m-    const [cars] = await db.query("SELECT * FROM cars");[m
+[32m+[m[32m    const [cars] = await db.query("SELECT * FROM cars ORDER BY id DESC");[m
+     res.json(cars);[m
+   } catch (error) {[m
+     res.status(500).json({ error: error.message });[m
+[36m@@ -11,7 +11,7 @@[m [mexports.getCars = async (req, res) => {[m
+ [m
+ exports.addCar = async (req, res) => {[m
+   try {[m
+[31m-    const {[m
+[32m+[m[32m    let {[m
+       brand,[m
+       model,[m
+       full_name,[m
+[36m@@ -20,22 +20,60 @@[m [mexports.addCar = async (req, res) => {[m
+       fuel,[m
+       seats,[m
+       price_per_day,[m
+[31m-      description[m
+[32m+[m[32m      description,[m
+[32m+[m[32m      status,[m
+[32m+[m[32m      main_image[m
+     } = req.body;[m
+ [m
+[32m+[m[32m    brand = brand ? brand.trim() : "";[m
+[32m+[m[32m    model = model ? model.trim() : "";[m
+[32m+[m[32m    full_name = full_name ? full_name.trim() : "";[m
+[32m+[m[32m    transmission = transmission ? transmission.trim() : "";[m
+[32m+[m[32m    fuel = fuel ? fuel.trim() : "";[m
+[32m+[m[32m    description = description ? description.trim() : "";[m
+[32m+[m[32m    status = status ? status.trim() : "available";[m
+[32m+[m[32m    main_image = main_image ? main_image.trim() : null;[m
+[32m+[m
+[32m+[m[32m    if ([m
+[32m+[m[32m      !brand ||[m
+[32m+[m[32m      !model ||[m
+[32m+[m[32m      !full_name ||[m
+[32m+[m[32m      !year ||[m
+[32m+[m[32m      !transmission ||[m
+[32m+[m[32m      !fuel ||[m
+[32m+[m[32m      !seats ||[m
+[32m+[m[32m      !price_per_day[m
+[32m+[m[32m    ) {[m
+[32m+[m[32m      return res.status(400).json({[m
+[32m+[m[32m        message: "Të gjitha fushat kryesore janë të detyrueshme"[m
+[32m+[m[32m      });[m
+[32m+[m[32m    }[m
+[32m+[m
+     const [result] = await db.query([m
+       `INSERT INTO cars [m
+[31m-      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description)[m
+[31m-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,[m
+[31m-      [brand, model, full_name, year, transmission, fuel, seats, price_per_day, description][m
+[32m+[m[32m      (brand, model, full_name, year, transmission, fuel, seats, price_per_day, description, status, main_image)[m
+[32m+[m[32m      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,[m
+[32m+[m[32m      [[m
+[32m+[m[32m        brand,[m
+[32m+[m[32m        model,[m
+[32m+[m[32m        full_name,[m
+[32m+[m[32m        year,[m
+[32m+[m[32m        transmission,[m
+[32m+[m[32m        fuel,[m
+[32m+[m[32m        seats,[m
+[32m+[m[32m        price_per_day,[m
+[32m+[m[32m        description,[m
+[32m+[m[32m        status,[m
+[32m+[m[32m        main_image[m
+[32m+[m[32m      ][m
+     );[m
+ [m
+     res.json({ message: "Car added successfully", id: result.insertId });[m
+[31m-[m
+   } catch (error) {[m
+     res.status(500).json({ error: error.message });[m
+   }[m
+ };[m
+[32m+[m
+ exports.getCarGallery = async (req, res) => {[m
+   try {[m
+     const { id } = req.params;[m
+[36m@@ -50,14 +88,14 @@[m [mexports.getCarGallery = async (req, res) => {[m
+     res.status(500).json({ error: error.message });[m
+   }[m
+ };[m
+[32m+[m
+ exports.deleteCar = async (req, res) => {[m
+   try {[m
+     const { id } = req.params;[m
+ [m
+[31m-    await db.query("DELETE FROM cars WHERE id=?", [id]);[m
+[32m+[m[32m    await db.query("DELETE FROM cars WHERE id = ?", [id]);[m
+ [m
+     res.json({ message: "Car deleted" });[m
+[31m-[m
+   } catch (error) {[m
+     res.status(500).json({ error: error.message });[m
+   }[m
+[36m@@ -66,7 +104,8 @@[m [mexports.deleteCar = async (req, res) => {[m
+ exports.updateCar = async (req, res) => {[m
+   try {[m
+     const { id } = req.params;[m
+[31m-    const {[m
+[32m+[m
+[32m+[m[32m    let {[m
+       brand,[m
+       model,[m
+       full_name,[m
+[36m@@ -75,21 +114,46 @@[m [mexports.updateCar = async (req, res) => {[m
+       fuel,[m
+       seats,[m
+       price_per_day,[m
+[31m-      description[m
+[32m+[m[32m      description,[m
+[32m+[m[32m      status[m
+     } = req.body;[m
+ [m
+[32m+[m[32m    brand = brand ? brand.trim() : "";[m
+[32m+[m[32m    model = model ? model.trim() : "";[m
+[32m+[m[32m    full_name = full_name ? full_name.trim() : "";[m
+[32m+[m[32m    transmission = transmission ? transmission.trim() : "";[m
+[32m+[m[32m    fuel = fuel ? fuel.trim() : "";[m
+[32m+[m[32m    description = description ? description.trim() : "";[m
+[32m+[m[32m    status = status ? status.trim() : "available";[m
+[32m+[m
+[32m+[m[32m    if ([m
+[32m+[m[32m      !brand ||[m
+[32m+[m[32m      !model ||[m
+[32m+[m[32m      !full_name ||[m
+[32m+[m[32m      !year ||[m
+[32m+[m[32m      !transmission ||[m
+[32m+[m[32m      !fuel ||[m
+[32m+[m[32m      !seats ||[m
+[32m+[m[32m      !price_per_day[m
+[32m+[m[32m    ) {[m
+[32m+[m[32m      return res.status(400).json({[m
+[32m+[m[32m        message: "Të gjitha fushat kryesore janë të detyrueshme"[m
+[32m+[m[32m      });[m
+[32m+[m[32m    }[m
+[32m+[m
+     await db.query([m
+       `UPDATE cars SET [m
+[31m-      brand=?,[m
+[31m-      model=?,[m
+[31m-      full_name=?,[m
+[31m-      year=?,[m
+[31m-      transmission=?,[m
+[31m-      fuel=?,[m
+[31m-      seats=?,[m
+[31m-      price_per_day=?,[m
+[31m-      description=?[m
+[31m-      WHERE id=?`,[m
+[32m+[m[32m      brand = ?,[m
+[32m+[m[32m      model = ?,[m
+[32m+[m[32m      full_name = ?,[m
+[32m+[m[32m      year = ?,[m
+[32m+[m[32m      transmission = ?,[m
+[32m+[m[32m      fuel = ?,[m
+[32m+[m[32m      seats = ?,[m
+[32m+[m[32m      price_per_day = ?,[m
+[32m+[m[32m      description = ?,[m
+[32m+[m[32m      status = ?[m
+[32m+[m[32m      WHERE id = ?`,[m
+       [[m
+         brand,[m
+         model,[m
+[36m@@ -100,12 +164,12 @@[m [mexports.updateCar = async (req, res) => {[m
+         seats,[m
+         price_per_day,[m
+         description,[m
+[32m+[m[32m        status,[m
+         id[m
+       ][m
+     );[m
+ [m
+     res.json({ message: "Car updated" });[m
+[31m-[m
+   } catch (error) {[m
+     res.status(500).json({ error: error.message });[m
+   }[m
