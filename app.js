@@ -65,6 +65,22 @@ async function createCarsTable() {
   }
 }
 
+async function createCarGalleryTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS car_gallery (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        car_id INT NOT NULL,
+        image VARCHAR(255) NOT NULL
+      )
+    `);
+
+    console.log("Tabela car_gallery u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës car_gallery:", error);
+  }
+}
+
 async function createAdminsTable() {
   try {
     await db.query(`
@@ -93,5 +109,6 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
   await createCarsTable();
+  await createCarGalleryTable();
   await createAdminsTable();
 });
