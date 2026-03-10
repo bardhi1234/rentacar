@@ -10,13 +10,18 @@ exports.uploadCarImage = async (req, res) => {
 
     const imagePath = req.file.filename;
 
-    await db.query("UPDATE cars SET main_image = ? WHERE id = ?", [imagePath, id]);
+    await db.query(
+      "UPDATE cars SET main_image = ? WHERE id = ?",
+      [imagePath, Number(id)]
+    );
 
     res.json({
       message: "Foto u ngarkua me sukses",
       file: imagePath,
     });
+
   } catch (error) {
+    console.error("Upload main image error:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -29,17 +34,21 @@ exports.uploadCarGallery = async (req, res) => {
       return res.status(400).json({ message: "Asnje foto nuk u dergua" });
     }
 
+    const carId = Number(id);
+
     for (const file of req.files) {
       await db.query(
         "INSERT INTO car_images (car_id, image) VALUES (?, ?)",
-        [id, file.filename]
+        [carId, file.filename]
       );
     }
 
     res.json({
       message: "Fotot e galerise u ngarkuan me sukses"
     });
+
   } catch (error) {
+    console.error("Upload gallery error:", error);
     res.status(500).json({ error: error.message });
   }
 };
