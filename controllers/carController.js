@@ -62,36 +62,11 @@ exports.getCarGallery = async (req, res) => {
     const { id } = req.params;
 
     const [images] = await db.query(
-      "SELECT * FROM car_images WHERE car_id = ? ORDER BY id DESC",
+      "SELECT * FROM car_gallery WHERE car_id = ? ORDER BY id DESC",
       [id]
     );
 
     res.json(images);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// UPLOAD GALLERY IMAGES
-exports.uploadGallery = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const files = req.files;
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: "Nuk u dergua asnje foto" });
-    }
-
-    for (const file of files) {
-      await db.query(
-        "INSERT INTO car_images (car_id, image) VALUES (?, ?)",
-        [id, file.filename]
-      );
-    }
-
-    res.json({
-      message: "Fotot e galerise u ngarkuan me sukses"
-    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
