@@ -27,10 +27,12 @@ app.use(express.urlencoded({ extended: true }));
 const carRoutes = require("./routes/carRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const bookingRoutes = require("./routes/bookingRoutes");
 
 app.use("/api", carRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", adminRoutes);
+app.use("/api", bookingRoutes);
 
 // statik për fotot
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -104,6 +106,28 @@ async function createAdminsTable() {
   }
 }
 
+async function createBookingsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        car_id INT NOT NULL,
+        pickup_date DATE NOT NULL,
+        return_date DATE NOT NULL,
+        pickup_location VARCHAR(255),
+        customer_name VARCHAR(255),
+        customer_phone VARCHAR(50),
+        status VARCHAR(50) DEFAULT 'confirmed',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    console.log("Tabela bookings u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës bookings:", error);
+  }
+}
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
@@ -111,4 +135,5 @@ app.listen(PORT, async () => {
   await createCarsTable();
   await createCarGalleryTable();
   await createAdminsTable();
+  await createBookingsTable();
 });
