@@ -3,17 +3,13 @@ const db = require("../config/db");
 // GET ALL BOOKINGS
 exports.getBookings = async (req, res) => {
   try {
-    const [rows] = await db.query(`
-      SELECT 
-        bookings.*,
-        cars.full_name AS car_name
-      FROM bookings
-      LEFT JOIN cars ON bookings.car_id = cars.id
-      ORDER BY bookings.id DESC
-    `);
+    const [rows] = await db.query(
+      "SELECT * FROM bookings ORDER BY id DESC"
+    );
 
     res.json(rows);
   } catch (error) {
+    console.error("Gabim në getBookings:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -59,6 +55,7 @@ exports.addBooking = async (req, res) => {
       id: result.insertId
     });
   } catch (error) {
+    console.error("Gabim në addBooking:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -111,6 +108,7 @@ exports.updateBooking = async (req, res) => {
       message: "Booking u përditësua me sukses"
     });
   } catch (error) {
+    console.error("Gabim në updateBooking:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -126,6 +124,7 @@ exports.deleteBooking = async (req, res) => {
       message: "Booking u fshi me sukses"
     });
   } catch (error) {
+    console.error("Gabim në deleteBooking:", error);
     res.status(500).json({ error: error.message });
   }
 };
