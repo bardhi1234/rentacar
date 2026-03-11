@@ -72,6 +72,27 @@ exports.getCarGallery = async (req, res) => {
   }
 };
 
+// GET BOOKED DATES FOR A CAR
+exports.getBookedDates = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query(
+      `
+      SELECT pickup_date, return_date
+      FROM bookings
+      WHERE car_id = ? AND status = 'confirmed'
+      ORDER BY pickup_date ASC
+      `,
+      [id]
+    );
+
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // DELETE CAR
 exports.deleteCar = async (req, res) => {
   try {
