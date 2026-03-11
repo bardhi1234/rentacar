@@ -42,6 +42,7 @@ app.get("/", (req, res) => {
   res.send("Rent A Car backend po funksionon 🚗");
 });
 
+// ==================== CARS TABLE ====================
 async function createCarsTable() {
   try {
     await db.query(`
@@ -67,6 +68,7 @@ async function createCarsTable() {
   }
 }
 
+// ==================== CAR GALLERY ====================
 async function createCarGalleryTable() {
   try {
     await db.query(`
@@ -83,6 +85,7 @@ async function createCarGalleryTable() {
   }
 }
 
+// ==================== ADMINS ====================
 async function createAdminsTable() {
   try {
     await db.query(`
@@ -106,8 +109,10 @@ async function createAdminsTable() {
   }
 }
 
+// ==================== BOOKINGS ====================
 async function createBookingsTable() {
   try {
+
     await db.query(`
       CREATE TABLE IF NOT EXISTS bookings (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -122,16 +127,25 @@ async function createBookingsTable() {
       )
     `);
 
-    console.log("Tabela bookings u krijua ose ekziston.");
+    // rregullon id nëse tabela ekziston pa auto_increment
+    await db.query(`
+      ALTER TABLE bookings
+      MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT
+    `);
+
+    console.log("Tabela bookings u krijua ose u përditësua.");
+
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës bookings:", error);
   }
 }
 
+// ==================== SERVER START ====================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
+
   await createCarsTable();
   await createCarGalleryTable();
   await createAdminsTable();
