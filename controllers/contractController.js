@@ -142,6 +142,37 @@ exports.createContract = async (req, res) => {
   }
 };
 
+
+// DELETE CONTRACT
+exports.deleteContract = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query(
+      `SELECT * FROM contracts WHERE id = ?`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Kontrata nuk u gjet." });
+    }
+
+    await db.query(
+      `DELETE FROM contract_payments WHERE contract_id = ?`,
+      [id]
+    );
+
+    await db.query(
+      `DELETE FROM contracts WHERE id = ?`,
+      [id]
+    );
+
+    res.json({ message: "Kontrata u fshi me sukses." });
+  } catch (error) {
+    console.error("Gabim në deleteContract:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 // ADD PAYMENT TO CONTRACT
 exports.addPaymentToContract = async (req, res) => {
   try {
