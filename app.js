@@ -112,10 +112,9 @@ async function createAdminsTable() {
 // ==================== BOOKINGS ====================
 async function createBookingsTable() {
   try {
-
     await db.query(`
       CREATE TABLE IF NOT EXISTS bookings (
-        id INT AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL,
         car_id INT NOT NULL,
         pickup_date DATE NOT NULL,
         return_date DATE NOT NULL,
@@ -127,14 +126,18 @@ async function createBookingsTable() {
       )
     `);
 
-    // rregullon id nëse tabela ekziston pa auto_increment
     await db.query(`
       ALTER TABLE bookings
-      MODIFY COLUMN id INT NOT NULL AUTO_INCREMENT
-    `);
+      MODIFY id INT NOT NULL AUTO_INCREMENT,
+      ADD PRIMARY KEY (id)
+    `).catch(async () => {
+      await db.query(`
+        ALTER TABLE bookings
+        MODIFY id INT NOT NULL AUTO_INCREMENT
+      `);
+    });
 
     console.log("Tabela bookings u krijua ose u përditësua.");
-
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës bookings:", error);
   }
