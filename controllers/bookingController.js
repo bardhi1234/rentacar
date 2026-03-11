@@ -36,8 +36,8 @@ exports.addBooking = async (req, res) => {
     const [result] = await db.query(
       `
       INSERT INTO bookings
-      (car_id, pickup_date, return_date, pickup_location, customer_name, customer_phone, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      (id, car_id, pickup_date, return_date, pickup_location, customer_name, customer_phone, status)
+      VALUES (NULL, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
         car_id,
