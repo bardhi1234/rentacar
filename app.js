@@ -28,11 +28,13 @@ const carRoutes = require("./routes/carRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const contractRoutes = require("./routes/contractRoutes");
 
 app.use("/api", carRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", adminRoutes);
 app.use("/api", bookingRoutes);
+app.use("/api", contractRoutes);
 
 // statik për fotot
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -114,7 +116,7 @@ async function createBookingsTable() {
   try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS bookings (
-        id INT NOT NULL,
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
         car_id INT NOT NULL,
         pickup_date DATE NOT NULL,
         return_date DATE NOT NULL,
@@ -126,20 +128,62 @@ async function createBookingsTable() {
       )
     `);
 
-    await db.query(`
-      ALTER TABLE bookings
-      MODIFY id INT NOT NULL AUTO_INCREMENT,
-      ADD PRIMARY KEY (id)
-    `).catch(async () => {
-      await db.query(`
-        ALTER TABLE bookings
-        MODIFY id INT NOT NULL AUTO_INCREMENT
-      `);
-    });
-
-    console.log("Tabela bookings u krijua ose u përditësua.");
+    console.log("Tabela bookings u krijua ose ekziston.");
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës bookings:", error);
+  }
+}
+
+// ==================== CONTRACTS ====================
+async function createContractsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS contracts (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        contract_number VARCHAR(100) NOT NULL,
+        car_id INT NOT NULL,
+        customer_name VARCHAR(255) NOT NULL,
+        birth_date DATE,
+        personal_number VARCHAR(100),
+        address VARCHAR(255),
+        phone VARCHAR(100),
+        pickup_date DATE NOT NULL,
+        pickup_time TIME,
+        return_date DATE NOT NULL,
+        return_time TIME,
+        price_per_day DECIMAL(10,2) DEFAULT 0,
+        total_days INT DEFAULT 1,
+        total_price DECIMAL(10,2) DEFAULT 0,
+        paid_amount DECIMAL(10,2) DEFAULT 0,
+        remaining_amount DECIMAL(10,2) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    console.log("Tabela contracts u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës contracts:", error);
+  }
+}
+
+// ==================== CONTRACT PAYMENTS ====================
+async function createContractPaymentsTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS contract_payments (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        contract_id INT NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        payment_method VARCHAR(100),
+        note VARCHAR(255),
+        payment_date DATE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    console.log("Tabela contract_payments u krijua ose ekziston.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës contract_payments:", error);
   }
 }
 
@@ -153,4 +197,6 @@ app.listen(PORT, async () => {
   await createCarGalleryTable();
   await createAdminsTable();
   await createBookingsTable();
+  await createContractsTable();
+  await createContractPaymentsTable();
 });
