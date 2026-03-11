@@ -116,7 +116,7 @@ async function createBookingsTable() {
   try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS bookings (
-        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL,
         car_id INT NOT NULL,
         pickup_date DATE NOT NULL,
         return_date DATE NOT NULL,
@@ -128,7 +128,18 @@ async function createBookingsTable() {
       )
     `);
 
-    console.log("Tabela bookings u krijua ose ekziston.");
+    await db.query(`
+      ALTER TABLE bookings
+      MODIFY id INT NOT NULL AUTO_INCREMENT,
+      ADD PRIMARY KEY (id)
+    `).catch(async () => {
+      await db.query(`
+        ALTER TABLE bookings
+        MODIFY id INT NOT NULL AUTO_INCREMENT
+      `);
+    });
+
+    console.log("Tabela bookings u krijua ose u përditësua.");
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës bookings:", error);
   }
@@ -139,7 +150,7 @@ async function createContractsTable() {
   try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS contracts (
-        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL,
         contract_number VARCHAR(100) NOT NULL,
         car_id INT NOT NULL,
         customer_name VARCHAR(255) NOT NULL,
@@ -160,7 +171,18 @@ async function createContractsTable() {
       )
     `);
 
-    console.log("Tabela contracts u krijua ose ekziston.");
+    await db.query(`
+      ALTER TABLE contracts
+      MODIFY id INT NOT NULL AUTO_INCREMENT,
+      ADD PRIMARY KEY (id)
+    `).catch(async () => {
+      await db.query(`
+        ALTER TABLE contracts
+        MODIFY id INT NOT NULL AUTO_INCREMENT
+      `);
+    });
+
+    console.log("Tabela contracts u krijua ose u përditësua.");
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës contracts:", error);
   }
@@ -171,7 +193,7 @@ async function createContractPaymentsTable() {
   try {
     await db.query(`
       CREATE TABLE IF NOT EXISTS contract_payments (
-        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+        id INT NOT NULL,
         contract_id INT NOT NULL,
         amount DECIMAL(10,2) NOT NULL,
         payment_method VARCHAR(100),
@@ -181,7 +203,18 @@ async function createContractPaymentsTable() {
       )
     `);
 
-    console.log("Tabela contract_payments u krijua ose ekziston.");
+    await db.query(`
+      ALTER TABLE contract_payments
+      MODIFY id INT NOT NULL AUTO_INCREMENT,
+      ADD PRIMARY KEY (id)
+    `).catch(async () => {
+      await db.query(`
+        ALTER TABLE contract_payments
+        MODIFY id INT NOT NULL AUTO_INCREMENT
+      `);
+    });
+
+    console.log("Tabela contract_payments u krijua ose u përditësua.");
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës contract_payments:", error);
   }
