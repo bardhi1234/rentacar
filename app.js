@@ -29,12 +29,14 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const contractRoutes = require("./routes/contractRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 app.use("/api", carRoutes);
 app.use("/api", uploadRoutes);
 app.use("/api", adminRoutes);
 app.use("/api", bookingRoutes);
 app.use("/api", contractRoutes);
+app.use("/api", paymentRoutes);
 
 // statik për fotot
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
