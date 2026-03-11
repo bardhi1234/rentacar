@@ -36,9 +36,15 @@ exports.uploadCarGallery = async (req, res) => {
     const carId = Number(id);
 
     for (const file of req.files) {
+      const [rows] = await db.query(
+        "SELECT COALESCE(MAX(id), 0) + 1 AS nextId FROM car_gallery"
+      );
+
+      const nextId = rows[0].nextId;
+
       await db.query(
-        "INSERT INTO car_gallery (car_id, image) VALUES (?, ?)",
-        [carId, file.filename]
+        "INSERT INTO car_gallery (id, car_id, image) VALUES (?, ?, ?)",
+        [nextId, carId, file.filename]
       );
     }
 
