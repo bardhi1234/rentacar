@@ -13,5 +13,7 @@ router.get("/contracts/:id", getContractById);
 router.post("/contracts", createContract);
 router.post("/contracts/:id/payment", addPaymentToContract);
 router.delete("/contracts/:id", deleteContract);
+router.put("/contracts/:id", updateContract);
 
 module.exports = router;
+

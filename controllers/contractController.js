@@ -145,7 +145,62 @@ exports.createContract = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+// UPDATECONTRACT
+exports.updateContract = async (req, res) => {
+  try {
 
+    const { id } = req.params;
+
+    const {
+      customer_name,
+      phone,
+      address,
+      pickup_date,
+      return_date,
+      price_per_day,
+      total_days,
+      total_price,
+      paid_amount,
+      remaining_amount
+    } = req.body;
+
+    await db.query(`
+      UPDATE contracts
+      SET
+        customer_name = ?,
+        phone = ?,
+        address = ?,
+        pickup_date = ?,
+        return_date = ?,
+        price_per_day = ?,
+        total_days = ?,
+        total_price = ?,
+        paid_amount = ?,
+        remaining_amount = ?
+      WHERE id = ?
+    `,[
+      customer_name,
+      phone,
+      address,
+      pickup_date,
+      return_date,
+      price_per_day,
+      total_days,
+      total_price,
+      paid_amount,
+      remaining_amount,
+      id
+    ]);
+
+    res.json({message:"Kontrata u përditësua"});
+
+  } catch (error) {
+
+    console.log(error);
+    res.status(500).json({error:error.message});
+
+  }
+};
 
 // DELETE CONTRACT
 exports.deleteContract = async (req, res) => {
