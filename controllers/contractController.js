@@ -41,7 +41,6 @@ exports.getContractById = async (req, res) => {
 };
 
 // CREATE CONTRACT
-// CREATE CONTRACT
 exports.createContract = async (req, res) => {
   try {
     const {
@@ -70,6 +69,8 @@ exports.createContract = async (req, res) => {
       });
     }
 
+    const createdAt = new Date();
+
     const [result] = await db.query(`
       INSERT INTO contracts (
         contract_number,
@@ -90,7 +91,7 @@ exports.createContract = async (req, res) => {
         remaining_amount,
         created_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       contract_number,
       car_id,
@@ -107,7 +108,8 @@ exports.createContract = async (req, res) => {
       total_days || 1,
       total_price || 0,
       paid_amount || 0,
-      remaining_amount || 0
+      remaining_amount || 0,
+      createdAt
     ]);
 
     if (paid_amount && Number(paid_amount) > 0) {
