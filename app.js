@@ -230,7 +230,6 @@ async function createContractPaymentsTable() {
   }
 }
 
-// ==================== EXPENSES ====================
 async function createExpensesTable() {
   try {
     await db.query(`
@@ -239,6 +238,7 @@ async function createExpensesTable() {
         title VARCHAR(255) NOT NULL,
         amount DECIMAL(10,2) NOT NULL,
         note TEXT,
+        expense_date DATE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -253,6 +253,11 @@ async function createExpensesTable() {
         MODIFY id INT NOT NULL AUTO_INCREMENT
       `);
     });
+
+    await db.query(`
+      ALTER TABLE expenses
+      ADD COLUMN expense_date DATE
+    `).catch(() => {});
 
     console.log("Tabela expenses u krijua ose u përditësua.");
   } catch (error) {
