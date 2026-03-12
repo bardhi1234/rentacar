@@ -145,18 +145,21 @@ exports.createContract = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-// UPDATECONTRACT
+// UPDATE CONTRACT
 exports.updateContract = async (req, res) => {
   try {
-
     const { id } = req.params;
 
     const {
       customer_name,
-      phone,
+      birth_date,
+      personal_number,
       address,
+      phone,
       pickup_date,
+      pickup_time,
       return_date,
+      return_time,
       price_per_day,
       total_days,
       total_price,
@@ -164,41 +167,58 @@ exports.updateContract = async (req, res) => {
       remaining_amount
     } = req.body;
 
-    await db.query(`
+    const [rows] = await db.query(
+      `SELECT * FROM contracts WHERE id = ?`,
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Kontrata nuk u gjet." });
+    }
+
+    await db.query(
+      `
       UPDATE contracts
       SET
         customer_name = ?,
-        phone = ?,
+        birth_date = ?,
+        personal_number = ?,
         address = ?,
+        phone = ?,
         pickup_date = ?,
+        pickup_time = ?,
         return_date = ?,
+        return_time = ?,
         price_per_day = ?,
         total_days = ?,
         total_price = ?,
         paid_amount = ?,
         remaining_amount = ?
       WHERE id = ?
-    `,[
-      customer_name,
-      phone,
-      address,
-      pickup_date,
-      return_date,
-      price_per_day,
-      total_days,
-      total_price,
-      paid_amount,
-      remaining_amount,
-      id
-    ]);
+      `,
+      [
+        customer_name || null,
+        birth_date || null,
+        personal_number || null,
+        address || null,
+        phone || null,
+        pickup_date || null,
+        pickup_time || null,
+        return_date || null,
+        return_time || null,
+        price_per_day || 0,
+        total_days || 1,
+        total_price || 0,
+        paid_amount || 0,
+        remaining_amount || 0,
+        id
+      ]
+    );
 
-    res.json({message:"Kontrata u përditësua"});
-
+    res.json({ message: "Kontrata u përditësua me sukses." });
   } catch (error) {
-
-    console.log(error);
-    res.status(500).json({error:error.message});
-
+    console.error("Gabim në updateContract:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 

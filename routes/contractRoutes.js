@@ -1,19 +1,20 @@
 const express = require("express");
 const router = express.Router();
+
 const {
   getContracts,
   getContractById,
   createContract,
   addPaymentToContract,
-  deleteContract
+  deleteContract,
+  updateContract
 } = require("../controllers/contractController");
 
 router.get("/contracts", getContracts);
 router.get("/contracts/:id", getContractById);
 router.post("/contracts", createContract);
+router.put("/contracts/:id", updateContract);
 router.post("/contracts/:id/payment", addPaymentToContract);
 router.delete("/contracts/:id", deleteContract);
-router.put("/contracts/:id", contractController.updateContract);
 
 module.exports = router;
-
