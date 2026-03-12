@@ -91,7 +91,8 @@ exports.getBookedDates = async (req, res) => {
       `
       SELECT pickup_date, return_date
       FROM contracts
-      WHERE car_id = ? AND status = 'active'
+      WHERE car_id = ?
+      AND (status = 'active' OR status IS NULL OR status = '')
       ORDER BY pickup_date ASC
       `,
       [id]
