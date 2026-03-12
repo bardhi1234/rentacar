@@ -239,6 +239,8 @@ exports.deleteContract = async (req, res) => {
       return res.status(404).json({ error: "Kontrata nuk u gjet." });
     }
 
+    const contract = rows[0];
+
     await db.query(
       `DELETE FROM contract_payments WHERE contract_id = ?`,
       [id]
@@ -247,6 +249,11 @@ exports.deleteContract = async (req, res) => {
     await db.query(
       `DELETE FROM contracts WHERE id = ?`,
       [id]
+    );
+
+    await db.query(
+      `UPDATE cars SET status = 'available' WHERE id = ?`,
+      [contract.car_id]
     );
 
     res.json({ message: "Kontrata u fshi me sukses." });
