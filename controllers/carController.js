@@ -77,7 +77,7 @@ exports.getBookedDates = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const [rows] = await db.query(
+    const [bookingRows] = await db.query(
       `
       SELECT pickup_date, return_date
       FROM bookings
@@ -87,8 +87,21 @@ exports.getBookedDates = async (req, res) => {
       [id]
     );
 
-    res.json(rows);
+    const [contractRows] = await db.query(
+      `
+      SELECT pickup_date, return_date
+      FROM contracts
+      WHERE car_id = ? AND status = 'active'
+      ORDER BY pickup_date ASC
+      `,
+      [id]
+    );
+
+    const allBookedDates = [...bookingRows, ...contractRows];
+
+    res.json(allBookedDates);
   } catch (error) {
+    console.error("Gabim në getBookedDates:", error);
     res.status(500).json({ error: error.message });
   }
 };
