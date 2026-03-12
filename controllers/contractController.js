@@ -41,6 +41,7 @@ exports.getContractById = async (req, res) => {
 };
 
 // CREATE CONTRACT
+// CREATE CONTRACT
 exports.createContract = async (req, res) => {
   try {
     const {
@@ -86,9 +87,10 @@ exports.createContract = async (req, res) => {
         total_days,
         total_price,
         paid_amount,
-        remaining_amount
+        remaining_amount,
+        created_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     `, [
       contract_number,
       car_id,
