@@ -30,6 +30,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const contractRoutes = require("./routes/contractRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
 app.use("/api", carRoutes);
 app.use("/api", uploadRoutes);
@@ -37,6 +38,7 @@ app.use("/api", adminRoutes);
 app.use("/api", bookingRoutes);
 app.use("/api", contractRoutes);
 app.use("/api", paymentRoutes);
+app.use("/api", expenseRoutes);
 
 // statik për fotot
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -169,6 +171,7 @@ async function createContractsTable() {
         total_price DECIMAL(10,2) DEFAULT 0,
         paid_amount DECIMAL(10,2) DEFAULT 0,
         remaining_amount DECIMAL(10,2) DEFAULT 0,
+        status VARCHAR(50) DEFAULT 'active',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -183,6 +186,11 @@ async function createContractsTable() {
         MODIFY id INT NOT NULL AUTO_INCREMENT
       `);
     });
+
+    await db.query(`
+      ALTER TABLE contracts
+      ADD COLUMN status VARCHAR(50) DEFAULT 'active'
+    `).catch(() => {});
 
     console.log("Tabela contracts u krijua ose u përditësua.");
   } catch (error) {
@@ -219,6 +227,36 @@ async function createContractPaymentsTable() {
     console.log("Tabela contract_payments u krijua ose u përditësua.");
   } catch (error) {
     console.error("Gabim gjatë krijimit të tabelës contract_payments:", error);
+  }
+}
+
+// ==================== EXPENSES ====================
+async function createExpensesTable() {
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS expenses (
+        id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        amount DECIMAL(10,2) NOT NULL,
+        note TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    await db.query(`
+      ALTER TABLE expenses
+      MODIFY id INT NOT NULL AUTO_INCREMENT,
+      ADD PRIMARY KEY (id)
+    `).catch(async () => {
+      await db.query(`
+        ALTER TABLE expenses
+        MODIFY id INT NOT NULL AUTO_INCREMENT
+      `);
+    });
+
+    console.log("Tabela expenses u krijua ose u përditësua.");
+  } catch (error) {
+    console.error("Gabim gjatë krijimit të tabelës expenses:", error);
   }
 }
 
@@ -266,6 +304,7 @@ app.listen(PORT, async () => {
   await createBookingsTable();
   await createContractsTable();
   await createContractPaymentsTable();
+  await createExpensesTable();
 
   await updateFinishedContractsAndCars();
 
