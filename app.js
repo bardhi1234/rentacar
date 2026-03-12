@@ -222,6 +222,38 @@ async function createContractPaymentsTable() {
   }
 }
 
+// ==================== AUTO UPDATE CONTRACTS & CARS ====================
+async function updateFinishedContractsAndCars() {
+  try {
+    const [contracts] = await db.query(`
+      SELECT id, car_id
+      FROM contracts
+      WHERE status = 'active'
+      AND return_date < CURDATE()
+    `);
+
+    if (!contracts.length) {
+      return;
+    }
+
+    for (const contract of contracts) {
+      await db.query(
+        `UPDATE contracts SET status = 'finished' WHERE id = ?`,
+        [contract.id]
+      );
+
+      await db.query(
+        `UPDATE cars SET status = 'available' WHERE id = ?`,
+        [contract.car_id]
+      );
+    }
+
+    console.log(`U përditësuan ${contracts.length} kontrata në finished.`);
+  } catch (error) {
+    console.error("Gabim në updateFinishedContractsAndCars:", error);
+  }
+}
+
 // ==================== SERVER START ====================
 const PORT = process.env.PORT || 5000;
 
@@ -234,4 +266,8 @@ app.listen(PORT, async () => {
   await createBookingsTable();
   await createContractsTable();
   await createContractPaymentsTable();
+
+  await updateFinishedContractsAndCars();
+
+  setInterval(updateFinishedContractsAndCars, 60000);
 });

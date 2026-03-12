@@ -89,9 +89,10 @@ exports.createContract = async (req, res) => {
         total_price,
         paid_amount,
         remaining_amount,
-        created_at
+        created_at,
+        status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       contract_number,
       car_id,
@@ -109,7 +110,8 @@ exports.createContract = async (req, res) => {
       total_price || 0,
       paid_amount || 0,
       remaining_amount || 0,
-      createdAt
+      createdAt,
+      "active"
     ]);
 
     if (paid_amount && Number(paid_amount) > 0) {
@@ -145,6 +147,7 @@ exports.createContract = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 // UPDATE CONTRACT
 exports.updateContract = async (req, res) => {
   try {
@@ -252,6 +255,7 @@ exports.deleteContract = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 // ADD PAYMENT TO CONTRACT
 exports.addPaymentToContract = async (req, res) => {
   try {
