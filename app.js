@@ -9,7 +9,7 @@ const db = require("./config/db");
 
 const app = express();
 
-// middleware
+// ==================== MIDDLEWARE ====================
 app.use(cors({
   origin: [
     "http://localhost:5500",
@@ -23,7 +23,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// routes
+// ==================== STATIC FILES ====================
+// E lëmë këtë për kompatibilitet me fotot e vjetra lokale.
+// Fotot e reja do ruhen në Cloudinary.
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ==================== ROUTES ====================
 const carRoutes = require("./routes/carRoutes");
 const uploadRoutes = require("./routes/uploadRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -40,10 +45,7 @@ app.use("/api", contractRoutes);
 app.use("/api", paymentRoutes);
 app.use("/api", expenseRoutes);
 
-// statik për fotot
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// test route
+// ==================== TEST ROUTE ====================
 app.get("/", (req, res) => {
   res.send("Rent A Car backend po funksionon 🚗");
 });
@@ -64,7 +66,7 @@ async function createCarsTable() {
         price_per_day DECIMAL(10,2),
         description TEXT,
         status VARCHAR(50),
-        main_image VARCHAR(255)
+        main_image VARCHAR(1000)
       )
     `);
 
@@ -81,7 +83,7 @@ async function createCarGalleryTable() {
       CREATE TABLE IF NOT EXISTS car_gallery (
         id INT AUTO_INCREMENT PRIMARY KEY,
         car_id INT NOT NULL,
-        image VARCHAR(255) NOT NULL
+        image VARCHAR(1000) NOT NULL
       )
     `);
 
@@ -230,6 +232,7 @@ async function createContractPaymentsTable() {
   }
 }
 
+// ==================== EXPENSES ====================
 async function createExpensesTable() {
   try {
     await db.query(`
@@ -275,9 +278,7 @@ async function updateFinishedContractsAndCars() {
       AND return_date < CURDATE()
     `);
 
-    if (!contracts.length) {
-      return;
-    }
+    if (!contracts.length) return;
 
     for (const contract of contracts) {
       await db.query(
@@ -297,7 +298,7 @@ async function updateFinishedContractsAndCars() {
   }
 }
 
-// ==================== SERVER START ====================
+// ==================== START SERVER ====================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, async () => {

@@ -1,4 +1,22 @@
 const db = require("../config/db");
+const cloudinary = require("../config/cloudinary");
+const streamifier = require("streamifier");
+
+function uploadToCloudinary(fileBuffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "rentacar"
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+}
 
 // GET ALL CARS
 exports.getCars = async (req, res) => {
@@ -26,7 +44,12 @@ exports.addCar = async (req, res) => {
       status
     } = req.body;
 
-    const main_image = req.file ? req.file.filename : null;
+    let main_image = null;
+
+    if (req.file) {
+      const uploadedImage = await uploadToCloudinary(req.file.buffer);
+      main_image = uploadedImage.secure_url;
+    }
 
     const [result] = await db.query(
       `INSERT INTO cars
@@ -52,6 +75,7 @@ exports.addCar = async (req, res) => {
       id: result.insertId
     });
   } catch (error) {
+    console.error("Gabim në addCar:", error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -140,7 +164,12 @@ exports.updateCar = async (req, res) => {
       status
     } = req.body;
 
-    const main_image = req.file ? req.file.filename : null;
+    let main_image = null;
+
+    if (req.file) {
+      const uploadedImage = await uploadToCloudinary(req.file.buffer);
+      main_image = uploadedImage.secure_url;
+    }
 
     if (main_image) {
       await db.query(
@@ -206,6 +235,7 @@ exports.updateCar = async (req, res) => {
       message: "Car updated"
     });
   } catch (error) {
+    console.error("Gabim në updateCar:", error);
     res.status(500).json({ error: error.message });
   }
 };
