@@ -1,23 +1,42 @@
 const db = require("../config/db");
+const cloudinary = require("../config/cloudinary");
+const streamifier = require("streamifier");
+
+function uploadToCloudinary(fileBuffer) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "rentacar"
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+
+    streamifier.createReadStream(fileBuffer).pipe(stream);
+  });
+}
 
 exports.uploadCarImage = async (req, res) => {
   try {
     const { id } = req.params;
 
     if (!req.file) {
-      return res.status(400).json({ message: "Asnje foto nuk u dergua" });
+      return res.status(400).json({ message: "Asnjë foto nuk u dërgua" });
     }
 
-    const imagePath = req.file.filename;
+    const uploadedImage = await uploadToCloudinary(req.file.buffer);
+    const imageUrl = uploadedImage.secure_url;
 
     await db.query(
       "UPDATE cars SET main_image = ? WHERE id = ?",
-      [imagePath, Number(id)]
+      [imageUrl, Number(id)]
     );
 
     res.json({
       message: "Foto u ngarkua me sukses",
-      file: imagePath,
+      file: imageUrl
     });
   } catch (error) {
     console.error("Upload main image error:", error);
@@ -30,26 +49,23 @@ exports.uploadCarGallery = async (req, res) => {
     const { id } = req.params;
 
     if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ message: "Asnje foto nuk u dergua" });
+      return res.status(400).json({ message: "Asnjë foto nuk u dërgua" });
     }
 
     const carId = Number(id);
 
     for (const file of req.files) {
-      const [rows] = await db.query(
-        "SELECT COALESCE(MAX(id), 0) + 1 AS nextId FROM car_gallery"
-      );
-
-      const nextId = rows[0].nextId;
+      const uploadedImage = await uploadToCloudinary(file.buffer);
+      const imageUrl = uploadedImage.secure_url;
 
       await db.query(
-        "INSERT INTO car_gallery (id, car_id, image) VALUES (?, ?, ?)",
-        [nextId, carId, file.filename]
+        "INSERT INTO car_gallery (car_id, image) VALUES (?, ?)",
+        [carId, imageUrl]
       );
     }
 
     res.json({
-      message: "Fotot e galerise u ngarkuan me sukses"
+      message: "Fotot e galerisë u ngarkuan me sukses"
     });
   } catch (error) {
     console.error("Upload gallery error:", error);
