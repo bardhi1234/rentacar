@@ -22,12 +22,17 @@ exports.uploadCarImage = async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log("UPLOAD MAIN IMAGE ID:", id);
+    console.log("REQ.FILE:", req.file);
+
     if (!req.file) {
       return res.status(400).json({ message: "Asnjë foto nuk u dërgua" });
     }
 
     const uploadedImage = await uploadToCloudinary(req.file.buffer);
     const imageUrl = uploadedImage.secure_url;
+
+    console.log("CLOUDINARY URL:", imageUrl);
 
     await db.query(
       "UPDATE cars SET main_image = ? WHERE id = ?",
@@ -48,6 +53,9 @@ exports.uploadCarGallery = async (req, res) => {
   try {
     const { id } = req.params;
 
+    console.log("UPLOAD GALLERY ID:", id);
+    console.log("REQ.FILES:", req.files);
+
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: "Asnjë foto nuk u dërgua" });
     }
@@ -57,6 +65,8 @@ exports.uploadCarGallery = async (req, res) => {
     for (const file of req.files) {
       const uploadedImage = await uploadToCloudinary(file.buffer);
       const imageUrl = uploadedImage.secure_url;
+
+      console.log("GALLERY CLOUDINARY URL:", imageUrl);
 
       await db.query(
         "INSERT INTO car_gallery (car_id, image) VALUES (?, ?)",
